@@ -14,7 +14,7 @@ metadata:
 data:
   stellar-core.cfg: |
 {{ if (.Values.core.config).bucketDirPath -}}
-BUCKET_DIR_PATH={{ .Values.core.config.bucketDirPath |quote }}
+BUCKET_DIR_PATH={{ .Values.core.config.bucketDirPath |quote -}}
 {{ end }}
 {{ if (.Values.core.config).database -}}
 DATABASE={{ (.Values.core.config).database | quote }}
@@ -139,8 +139,6 @@ ALLOW_LOCALHOST_FOR_TESTING={{ .Values.core.config.allowLocalhostForTesting | qu
 {{ if (.Values.core.config).nodeHomeDomain -}}
 NODE_HOME_DOMAIN={{ .Values.core.config.nodeHomeDomain | quote }}
 {{ end -}}
-#####################################
-
 {{ if (.Values.core.config).homeDomains -}}
 {{- range $homeDomain := .Values.core.config.homeDomains }}
 [[HOME_DOMAINS]]
@@ -148,7 +146,6 @@ HOME_DOMAIN={{ get $homeDomain "name" |quote }}
 QUALITY={{ get $homeDomain "quality" }}
 {{- end }}
 {{ end -}}
-
 {{ if (.Values.core.config).validators -}}
 {{ range $validator := .Values.core.config.validators -}}
 [[VALIDATORS]]
@@ -164,12 +161,10 @@ HISTORY={{ get $validator "history" | quote }}
 {{ end -}}
 {{ end -}}
 {{ end -}}
-
 {{ if (.Values.core.config).historyArchives -}}
-{{ range $archive .Values.core.config.historyArchives -}}
-[{{ get $archive "name" }}]
-{{ locations.each do |command, data| -}}
-{{ command }}={{= data }}
-{{ end -}}
+{{ range $key, $value := .Values.core.config.historyArchives -}}
+[{{ $key }}]
+get={{ get $value "get" | quote }}
+put={{ get $value "put" | quote }}
 {{ end -}}
 {{ end -}}
