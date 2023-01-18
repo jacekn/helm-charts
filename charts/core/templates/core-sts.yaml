@@ -42,14 +42,38 @@ spec:
       imagePullSecrets:
 {{ toYaml .Values.global.imagePullSecrets | indent 8 }}
       {{- end }}
+      initContainers:
+      - name: core-new-db
+        image: {{ include "common.coreImage" . | quote }}
+        args:
+          - new-db
+          - --conf
+          - /config/stellar-core.cfg
+          - --console
+        imagePullPolicy: {{ .Values.global.image.core.pullPolicy }}
+        ports:
+        - containerPort: 11626
+          name: core
+        {{- if (.Values.core).resources }}
+        resources:
+{{ toYaml .Values.core.resources | indent 10 }}
+        {{- end }}
+        volumeMounts:
+        - mountPath: /config
+          name: core-config
+        {{- if .Values.core.persistence.enabled }}
+        - mountPath: /var/lib/stellar
+          name: {{ template "common.fullname" . }}-var-lib-stellar
+        {{- end }}
       containers:
       - name: core
         image: {{ include "common.coreImage" . | quote }}
-        {{- if (.Values.core).extraCliArgs }}
         args:
           - run
           - --conf
-          -- /config/stellar-core.cfg
+          - /config/stellar-core.cfg
+          - --console
+        {{- if (.Values.core).extraCliArgs }}
           {{- range $flag := .Values.core.extraCliArgs }}
           - {{ $flag | quote }}
           {{- end }}
